@@ -124,4 +124,27 @@ lemma2-2-3 (succ n) m with lemma2-2-3-→ m
 -- I have decided to never use implicit variables ever.
 
 ℕ-+-comm : ∀ (n m : ℕ) → n + m ≡ m + n
-ℕ-+-comm n m = ℕ-induction n (λ x → x + m ≡ m + x) (ℕ-symm (lemma2-2-2 m)) ( ℕ-+-comm-→ m)
+ℕ-+-comm n m =
+  ℕ-induction
+    n
+    (λ x → x + m ≡ m + x)
+    (ℕ-symm (lemma2-2-2 m))
+    (ℕ-+-comm-→ m)
+
+ℕ-+-assoc-→ :
+  ∀ (c b a : ℕ) →
+  (a + b) + c ≡ a + (b + c)
+  → ((succ a) + b) + c ≡ (succ a) + (b + c)
+ℕ-+-assoc-→ c b zero hyp = refl
+ℕ-+-assoc-→ c b (succ a) hyp rewrite hyp = refl
+
+-- Addition over natural numbers is associative
+
+ℕ-+-assoc : ∀ (a b c : ℕ) → (a + b) + c ≡ a + (b + c)
+ℕ-+-assoc zero b c = refl
+ℕ-+-assoc a b c =
+  ℕ-induction
+    a
+    (λ x →  (x + b) + c ≡ x + (b + c))
+    refl
+    (ℕ-+-assoc-→ c b)
