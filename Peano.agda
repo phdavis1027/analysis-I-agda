@@ -32,6 +32,8 @@ instance
     ; transitivity = ℕ-trans
    }
 
+-- These are canonically axioms, but are just provable by definition under Agda's type checker
+
 succNotZero : ∀ (n : ℕ) → ¬ (succ n ≡ zero)
 succNotZero zero = λ ()
 succNotZero (succ n) = λ ()
@@ -39,13 +41,18 @@ succNotZero (succ n) = λ ()
 succInj : ∀ {n m : ℕ} → (succ n) ≡ (succ m) → n ≡ m
 succInj refl = refl
 
+-- We can use induction to prove properties indexed by natural numbers
+
 ℕ-induction :
   ∀ (n : ℕ) (P : ℕ → Set)
   → P zero
-  → (s : ∀ {m : ℕ} → P m → P (succ m))
+  → (s : ∀ (m : ℕ) → P m → P (succ m))
   → P n
 ℕ-induction zero _ Pzero _ = Pzero
-ℕ-induction (succ n) P Pzero Pn→P-succ-n = Pn→P-succ-n (ℕ-induction n P Pzero Pn→P-succ-n)
+ℕ-induction (succ n) P Pzero Pn→P-succ-n =
+  Pn→P-succ-n n (ℕ-induction n P Pzero Pn→P-succ-n)
+
+-- We can use induction to define sequences.
 
 record recSeq : Set where
   field
@@ -53,7 +60,7 @@ record recSeq : Set where
     aₙs : ℕ → ℕ
     fₙs : ∀ (n : ℕ) → ℕ → ℕ
     baseCase : aₙs zero ≡ c
-    recursion : ∀ {n : ℕ} → aₙs (succ n) ≡ fₙs n (aₙs n)
+    recursion : ∀ (n : ℕ) → aₙs (succ n) ≡ fₙs n (aₙs n)
 
 aₙsImpl :
   ℕ
@@ -71,5 +78,50 @@ aₙsImpl c fₙs (succ n) = fₙs n (aₙsImpl  c fₙs n)
                         ; aₙs = λ n → aₙsImpl c fₙs n
                         ; fₙs =  fₙs
                         ; baseCase = refl
-                        ; recursion = refl
+                        ; recursion = λ n → refl
                         }
+
+-- Defining addition in the normal way
+infix 40 _+_
+_+_ : ℕ → ℕ → ℕ
+zero   + m = m
+succ n + m = succ (n + m)
+
+lemma2-2-2-→ :
+  ∀ (n : ℕ)
+  → n + zero ≡ n
+  → (succ n) + zero ≡ succ n
+lemma2-2-2-→ n n+zero≡n rewrite n+zero≡n = refl
+
+lemma2-2-2 : ∀ (n : ℕ) → n + zero ≡ n
+lemma2-2-2 n = ℕ-induction n (λ x → x + zero ≡ x) refl lemma2-2-2-→
+
+lemma2-2-3-→ :
+  ∀ (m n : ℕ)
+  → n + succ m ≡ succ (n + m)
+  → succ n + succ m ≡ succ (succ n + m)
+lemma2-2-3-→ _ _ eq rewrite eq = refl
+
+lemma2-2-3 : ∀ (n m : ℕ) → n + succ m ≡ succ (n + m)
+lemma2-2-3 zero _ = refl
+lemma2-2-3 (succ n) m with lemma2-2-3-→ m
+... | hyp =
+  ℕ-induction
+    n
+    (λ x → succ x + succ m ≡ succ (succ x + m))
+    refl
+    (λ n' → hyp (succ n'))
+
+ℕ-+-comm-→ :
+  ∀ (m n : ℕ)
+  → n + m ≡ m + n
+  → (succ n) + m ≡ m + succ n
+ℕ-+-comm-→ zero _ eq rewrite eq = refl
+ℕ-+-comm-→ m n eq rewrite eq with lemma2-2-3 n m
+... | hyp = ℕ-symm (lemma2-2-3 m n)
+
+-- In the process of formalizing commutativity of addition of natural numbers,
+-- I have decided to never use implicit variables ever.
+
+ℕ-+-comm : ∀ (n m : ℕ) → n + m ≡ m + n
+ℕ-+-comm n m = ℕ-induction n (λ x → x + m ≡ m + x) (ℕ-symm (lemma2-2-2 m)) ( ℕ-+-comm-→ m)
