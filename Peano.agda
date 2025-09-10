@@ -148,3 +148,18 @@ lemma2-2-3 (succ n) m with lemma2-2-3-→ m
     (λ x →  (x + b) + c ≡ x + (b + c))
     refl
     (ℕ-+-assoc-→ c b)
+
+-- Left-cancellability of addition over natural numbers.
+-- This problem drove me to the brink of madness.
+
+ℕ-+-cancelₗ :
+  ∀ (c b a : ℕ)
+  → a + b ≡ a + c
+  → b ≡ c
+ℕ-+-cancelₗ c b zero eq = eq
+ℕ-+-cancelₗ c b (succ a) eq =
+  ℕ-induction
+    a
+    (λ x → b ≡ c)
+    (ℕ-+-cancelₗ c b a (succInj eq))
+    λ m x → x
