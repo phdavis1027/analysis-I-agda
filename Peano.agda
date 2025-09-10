@@ -163,3 +163,22 @@ lemma2-2-3 (succ n) m with lemma2-2-3-→ m
     (λ x → b ≡ c)
     (ℕ-+-cancelₗ c b a (succInj eq))
     λ m x → x
+
+data ℕ-pos (a : ℕ) : Set where
+  proof : ¬ (a ≡ zero) → ℕ-pos a
+
+prop2-2-8 : ∀ (a b : ℕ) → ℕ-pos a → ℕ-pos (a + b)
+prop2-2-8 zero b (proof x) =
+  proof λ _ →  x refl
+prop2-2-8 (succ a) b (proof p) =
+  proof
+    λ x → succNotZero
+    (a + b) x
+
+-- Agda can directly find this through normalization
+
+corr2-2-9 :
+  ∀ (a b : ℕ)
+  → a + b ≡ zero
+  → (a ≡ zero) × (b ≡ zero)
+corr2-2-9 zero zero a+b≡zero = ⟨ a+b≡zero , a+b≡zero ⟩

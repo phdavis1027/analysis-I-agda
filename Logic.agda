@@ -17,3 +17,9 @@ record EqRel (A : Set) : Set₁ where
 
 negImpl : ∀ {p m : Set} → (p → m) → (¬ m → ¬ p)
 negImpl p→m ¬m p = ¬m (p→m p)
+
+record _×_ (A B : Set) : Set where
+  constructor ⟨_,_⟩
+  field
+    l : A
+    r : B
