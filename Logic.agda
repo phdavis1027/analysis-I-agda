@@ -23,3 +23,20 @@ record _×_ (A B : Set) : Set where
   field
     l : A
     r : B
+
+data Σ (A : Set) (B : A → Set) : Set where
+  [_,_] : (x : A) → B x → Σ A B
+
+Σ-obj : ∀ {A : Set} {B : A → Set} → Σ A B → A
+Σ-obj [ x , y ] = x
+
+Σ-pred :
+  ∀ {A : Set} {B : A → Set}
+  → ∀ (w : Σ A B)
+  → B (Σ-obj w)
+Σ-pred [ x , y ] = y
+
+⊥-elim : ∀ {A : Set}
+  → ⊥
+  → A
+⊥-elim = λ ()

@@ -13,6 +13,8 @@ data ℕ : Set where
 
 ℕ-refl : ∀ {a : ℕ} → a ≡ a
 ℕ-refl = refl
+N-refl : ∀ (a : ℕ) → a ≡ a
+N-refl a = refl
 
 ℕ-symm : ∀ {a b : ℕ} → a ≡ b → b ≡ a
 ℕ-symm refl = refl
@@ -164,6 +166,12 @@ lemma2-2-3 (succ n) m with lemma2-2-3-→ m
     (ℕ-+-cancelₗ c b a (succInj eq))
     λ m x → x
 
+ℕ-+-introₗ :
+  ∀ (c b a : ℕ)
+  → b ≡ c
+  → a + b ≡ a + c
+ℕ-+-introₗ c b a refl = refl
+
 data ℕ-pos (a : ℕ) : Set where
   proof : ¬ (a ≡ zero) → ℕ-pos a
 
@@ -182,3 +190,54 @@ corr2-2-9 :
   → a + b ≡ zero
   → (a ≡ zero) × (b ≡ zero)
 corr2-2-9 zero zero a+b≡zero = ⟨ a+b≡zero , a+b≡zero ⟩
+
+succ-≡ : ∀ (a : ℕ) ℕ → Set
+succ-≡ a = λ b → succ b ≡ a
+
+lemma2-2-10-∃ :
+  ∀ (a : ℕ)
+  → ℕ-pos a
+  → Σ ℕ (succ-≡ a)
+lemma2-2-10-∃ zero (proof p) = ⊥-elim (p refl)
+lemma2-2-10-∃ (succ n) p = [ n , refl ]
+
+lemma2-2-10-unique :
+  ∀ (a b c : ℕ)
+  → (succ-≡ a b × succ-≡ a c)
+  → b ≡ c
+lemma2-2-10-unique _ _ _ ⟨ refl , refl ⟩ = refl
+
+le-sat : ∀ (a b : ℕ) → ℕ → Set
+le-sat a b = λ c → a ≡ b + c
+
+data _≤_ (a b : ℕ) : Set where
+  le : Σ ℕ (le-sat a b) → a ≤ b
+
+data _<_ (a b : ℕ) : Set where
+  lt : (a ≤ b) × (¬ (a ≡ b)) → a < b
+
+data _≥_ (a b : ℕ) : Set where
+  ge : b ≤ a → a ≥ b
+
+data _>_ (a b : ℕ) : Set where
+  gt : b < a → a > b
+
+≥-refl : (a : ℕ) → a ≥ a
+≥-refl a = ge (le [ zero , ℕ-symm (lemma2-2-2 a) ])
+
+-- Murdered by pattern-matching
+
+≥-trans : ∀ (a b c : ℕ) → a ≥ b → b ≥ c → a ≥ c
+≥-trans
+  a b c
+  (ge (le [ b' , refl ]))
+  (ge (le [ c' , refl ])) rewrite ℕ-+-assoc a b' c' =
+    ge ( le
+         [ c' + b'
+         , ℕ-+-introₗ
+           (c' + b')
+           (b' + c')
+           a
+           (ℕ-+-comm b' c')
+         ]
+        )
