@@ -208,7 +208,7 @@ lemma2-2-10-unique :
 lemma2-2-10-unique _ _ _ ⟨ refl , refl ⟩ = refl
 
 le-sat : ∀ (a b : ℕ) → ℕ → Set
-le-sat a b = λ c → a ≡ b + c
+le-sat a b = λ c → a + c ≡ b
 
 data _≤_ (a b : ℕ) : Set where
   le : Σ ℕ (le-sat a b) → a ≤ b
@@ -223,21 +223,19 @@ data _>_ (a b : ℕ) : Set where
   gt : b < a → a > b
 
 ≥-refl : (a : ℕ) → a ≥ a
-≥-refl a = ge (le [ zero , ℕ-symm (lemma2-2-2 a) ])
+≥-refl a = ge (le [ zero , lemma2-2-2 a ])
 
 -- Murdered by pattern-matching
 
 ≥-trans : ∀ (a b c : ℕ) → a ≥ b → b ≥ c → a ≥ c
-≥-trans
-  a b c
-  (ge (le [ b' , refl ]))
-  (ge (le [ c' , refl ])) rewrite ℕ-+-assoc a b' c' =
-    ge ( le
-         [ c' + b'
-         , ℕ-+-introₗ
-           (c' + b')
-           (b' + c')
-           a
-           (ℕ-+-comm b' c')
-         ]
-        )
+≥-trans a b c (ge (le [ b₁ , refl ])) (ge (le [ c₁ , refl ])) rewrite ℕ-+-assoc c c₁ b₁ = ge (le [ c₁ + b₁ , refl ])
+
+
+≥-anti-symm-lemma : ∀ (a b : ℕ) → a + b ≡ a → b ≡ zero
+≥-anti-symm-lemma a zero a+b≡a = refl
+≥-anti-symm-lemma a (succ b) eq  = {! !}
+-- a = b + b'
+-- b = a + a'
+-- b = b + b' + a'
+≥-anti-symm : ∀ (a b : ℕ) → a ≥ b → b ≥ a → a ≡ b
+≥-anti-symm a b (ge (le [ c₁ , refl ])) (ge (le [ c₂ , eq ])) rewrite ℕ-+-assoc b c₁ c₂ = {!!}
