@@ -230,12 +230,15 @@ data _>_ (a b : ℕ) : Set where
 ≥-trans : ∀ (a b c : ℕ) → a ≥ b → b ≥ c → a ≥ c
 ≥-trans a b c (ge (le [ b₁ , refl ])) (ge (le [ c₁ , refl ])) rewrite ℕ-+-assoc c c₁ b₁ = ge (le [ c₁ + b₁ , refl ])
 
+≡-euclid : ∀ (a b c : ℕ) → a ≡ b → a ≡ c → b ≡ c
+≡-euclid a b c refl refl = refl
 
-≥-anti-symm-lemma : ∀ (a b : ℕ) → a + b ≡ a → b ≡ zero
-≥-anti-symm-lemma a zero a+b≡a = refl
-≥-anti-symm-lemma a (succ b) eq  = {! !}
 -- a = b + b'
 -- b = a + a'
 -- b = b + b' + a'
 ≥-anti-symm : ∀ (a b : ℕ) → a ≥ b → b ≥ a → a ≡ b
-≥-anti-symm a b (ge (le [ c₁ , refl ])) (ge (le [ c₂ , eq ])) rewrite ℕ-+-assoc b c₁ c₂ = {!!}
+≥-anti-symm a b (ge (le [ c₁ , refl ])) (ge (le [ c₂ , eq ])) rewrite ℕ-+-assoc b c₁ c₂ with lemma2-2-2 b
+... | x with ≡-euclid b (b + (c₁ + c₂)) (b + zero) (ℕ-symm eq) (ℕ-symm x)
+... | y with ℕ-+-cancelₗ zero (c₁ + c₂) b y
+... | z with corr2-2-9 c₁ c₂ z
+... | ⟨ pr1 , pr2 ⟩ rewrite pr1 = x
